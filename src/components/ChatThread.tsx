@@ -5,8 +5,10 @@ import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import type { Message } from '../services/models';
 import { getChatThread, sendMessage } from '../services/service';
+import { loaderStyle } from '../services/utilities';
 import Header from './Header';
 import Layout from './Layout';
+import MessageItem from './MessageItem';
 
 function ChatThread() {
     const navigate = useNavigate();
@@ -25,14 +27,6 @@ function ChatThread() {
         })();
     }, [location.state.other.email]);
 
-    function isMine(message: Message): boolean {
-        return message.sender !== location.state.other.email;
-    }
-
-    function isTyping(): boolean {
-        return message.trim().length > 0;
-    }
-
     async function validateAndSendMessage() {
         const data = await sendMessage(location.state.other.email, message);
         if (data) {
@@ -46,6 +40,15 @@ function ChatThread() {
         if (data) setChatThread(prev => [...prev, ...data]);
     }
 
+    function onEnterOrEscapeKey(e: React.KeyboardEvent<HTMLInputElement>) {
+        if (e.key === 'Enter') {
+            if (message.trim().length > 0) validateAndSendMessage();
+            else refreshChatThread();
+            return;
+        }
+        if (e.key === 'Escape' || e.key === 'Esc') setMessage('');
+    }
+
     return (
         <Layout>
             <Header title={location.state.other.name} button={{ label: 'Close', action: () => navigate(-1) }} />
@@ -53,36 +56,26 @@ function ChatThread() {
             {
                 loading
                     ? <ProgressSpinner style={loaderStyle} strokeWidth='0.15rem' animationDuration='0.5s' />
-                    : <ul>
-                        {chatThread.map(m =>
-                            <li key={m.timestamp} className={`
-                                    flex p-4 my-4 rounded-2xl text-black font-bold
-                                    ${isMine(m)
-                                    ? 'justify-end bg-blue-300 rounded-br-none ms-20'
-                                    : 'justify-start bg-yellow-100 rounded-bl-none me-20'
-                                }  
-                                `}>{m.message}</li>)}
-                    </ul>
+                    : <ul>{
+                        chatThread.map((message, i) =>
+                            <li key={message.timestamp}>
+                                <MessageItem message={message} other={location.state.other}
+                                    showName={i > 0 ? chatThread[i - 1].sender !== message.sender : true} />
+                            </li>)
+                    }</ul>
 
             }
 
             <div className="p-inputgroup flex">
                 <InputText placeholder='Type your message...' className='w-full'
                     value={message}
-                    onChange={e => setMessage(e.target.value)} />
-                <Button icon={`pi ${isTyping() ? 'pi-arrow-up' : 'pi-arrow-down'}`}
-                    onClick={() => isTyping() ? validateAndSendMessage() : refreshChatThread()} />
+                    onChange={e => setMessage(e.target.value)}
+                    onKeyDown={onEnterOrEscapeKey} />
+                <Button icon={`pi ${message.trim().length > 0 ? 'pi-arrow-up' : 'pi-arrow-down'}`}
+                    onClick={() => message.trim().length > 0 ? validateAndSendMessage() : refreshChatThread()} />
             </div>
         </Layout>
     );
 }
 
 export default ChatThread;
-
-const loaderStyle = {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: '66vh',
-    width: '40%'
-};

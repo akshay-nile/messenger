@@ -54,7 +54,7 @@ function RegisterUser() {
                 <div className="flex flex-col gap-2">
                     <label htmlFor="email">Email ID</label>
                     <InputText id="email" required aria-describedby="email-help"
-                        value={user.email}
+                        value={user.email.toLowerCase()}
                         onChange={e => setUser({ ...user, email: e.target.value })}
                         onFocus={() => setEmailAlreadyTaken(false)}
                         onBlur={e => checkEmailAlreadyTaken(e.target.value.trim())} />

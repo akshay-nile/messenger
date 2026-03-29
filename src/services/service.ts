@@ -2,8 +2,15 @@ import type { Message, User, UserLogin, UserRegistration } from './models';
 
 let token: string | null = localStorage.getItem('token');
 
-export function isLoggedIn() {
-    return !!token;
+export function isLoggedIn(): string | null {
+    if (token) {
+        const base64Playload = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(atob(base64Playload).split('').map(c => {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+        return JSON.parse(jsonPayload)?.email;
+    }
+    return null;
 }
 
 export function logout() {
@@ -46,7 +53,7 @@ export async function checkUserExists(email: string): Promise<{ exists: boolean 
 
 export async function getAllUsers(): Promise<User[] | null> {
     const response = await fetch('/users', {
-        headers: { 'Authentication': 'Bearer ' + token }
+        headers: { 'Authorization': 'Bearer ' + token }
     });
     if (response.ok) return await response.json();
     return null;
@@ -55,7 +62,7 @@ export async function getAllUsers(): Promise<User[] | null> {
 export async function getChatThread(other: string, refresh = false): Promise<Message[] | null> {
     const params = '?refresh=' + refresh;
     const response = await fetch('/chats/' + encodeURIComponent(other) + params, {
-        headers: { 'Authentication': 'Bearer ' + token }
+        headers: { 'Authorization': 'Bearer ' + token }
     });
     if (response.ok) return await response.json();
     return null;
@@ -64,7 +71,7 @@ export async function getChatThread(other: string, refresh = false): Promise<Mes
 export async function deleteChatThread(other: string): Promise<{ deleted: boolean }> {
     const response = await fetch('/chats/' + encodeURIComponent(other), {
         method: 'DELETE',
-        headers: { 'Authentication': 'Bearer ' + token }
+        headers: { 'Authorization': 'Bearer ' + token }
     });
     if (response.ok) return await response.json();
     return { deleted: false };
@@ -73,7 +80,7 @@ export async function deleteChatThread(other: string): Promise<{ deleted: boolea
 export async function sendMessage(other: string, message: string): Promise<Message | null> {
     const response = await fetch('/chats/' + encodeURIComponent(other), {
         method: 'POST',
-        headers: { 'Authentication': 'Bearer ' + token },
+        headers: { 'Authorization': 'Bearer ' + token },
         body: message
     });
     if (response.ok) return await response.json();

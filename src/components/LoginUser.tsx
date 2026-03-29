@@ -2,10 +2,10 @@ import { sha256 } from 'js-sha256';
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
 import { Password } from 'primereact/password';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import type { UserLogin } from '../services/models';
-import { loginUser } from '../services/service';
+import { isLoggedIn, loginUser } from '../services/service';
 import Layout from './Layout';
 import Header from './Header';
 
@@ -13,10 +13,12 @@ function LoginUser() {
     const navigate = useNavigate();
     const [user, setUser] = useState<UserLogin>({ email: '', password: '' });
 
+    useEffect(() => { if (isLoggedIn()) navigate('/messenger'); }, [navigate]);
+
     async function validateAndLoginUser(e: React.SubmitEvent<HTMLFormElement>) {
         e.preventDefault();
-        const isLoggedIn = await loginUser({ ...user, password: sha256(user.password) });
-        if (isLoggedIn) navigate('/messenger', { state: { email: user.email } });
+        const loggedIn = await loginUser({ ...user, password: sha256(user.password) });
+        if (loggedIn) navigate('/messenger');
         else setUser({ email: '', password: '' });
     }
 
@@ -28,7 +30,7 @@ function LoginUser() {
                 <div className="flex flex-col gap-2">
                     <label htmlFor="email">Email ID</label>
                     <InputText id="email" required aria-describedby="email-help"
-                        value={user.email}
+                        value={user.email.toLowerCase()}
                         onChange={e => setUser({ ...user, email: e.target.value })} />
                     <small id="email-help" className='text-xs'>Enter your email id.</small>
                 </div>
