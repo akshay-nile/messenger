@@ -1,47 +1,50 @@
 import type { Message, User, UserLogin, UserRegistration } from './models';
 
-let token: string | null = null;
-export let user: User | null = null;
+let token: string | null = localStorage.getItem('token');
 
-export async function registerUser(userToRegister: UserRegistration): Promise<{ registered: boolean }> {
+export function isLoggedIn() {
+    return !!token;
+}
+
+export function logout() {
+    token = null;
+    localStorage.removeItem('token');
+}
+
+export async function registerUser(user: UserRegistration): Promise<{ registered: boolean }> {
     const response = await fetch('/user/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(userToRegister)
+        body: JSON.stringify(user)
     });
     if (response.ok) return await response.json();
     return { registered: false };
 }
 
-export async function loginUser(userToLogin: UserLogin): Promise<boolean> {
+export async function loginUser(user: UserLogin): Promise<boolean> {
     const response = await fetch('/user/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(userToLogin)
+        body: JSON.stringify(user)
     });
     if (response.ok) {
         const data = await response.json();
-        if (data) {
-            user = data.user;
+        if (data && data.token) {
             token = data.token;
+            localStorage.setItem('token', data.token);
             return true;
         }
     }
     return false;
 }
 
-export function logout() {
-    token = user = null;
-    localStorage.removeItem('token');
-}
-
-export async function getCurrentUser(email: string): Promise<User | null> {
+export async function checkUserExists(email: string): Promise<{ exists: boolean } | null> {
     const response = await fetch('/user/' + encodeURIComponent(email));
-    if (response.ok) user = await response.json();
-    return user;
+    if (response.ok) return await response.json();
+    return null;
 }
 
-export async function getUsers(): Promise<User[] | null> {
+export async function getAllUsers(): Promise<User[] | null> {
     const response = await fetch('/users', {
         headers: { 'Authentication': 'Bearer ' + token }
     });
@@ -67,12 +70,12 @@ export async function deleteChatThread(other: string): Promise<{ deleted: boolea
     return { deleted: false };
 }
 
-export async function sendMessage(other: string, message: string): Promise<{ stored: boolean }> {
+export async function sendMessage(other: string, message: string): Promise<Message | null> {
     const response = await fetch('/chats/' + encodeURIComponent(other), {
         method: 'POST',
         headers: { 'Authentication': 'Bearer ' + token },
         body: message
     });
     if (response.ok) return await response.json();
-    return { stored: false };
+    return null;
 }

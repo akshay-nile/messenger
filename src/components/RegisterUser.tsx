@@ -3,10 +3,11 @@ import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
 import { Password } from 'primereact/password';
 import { useState } from 'react';
-import type { UserRegistration } from '../services/models';
-import { getCurrentUser, registerUser } from '../services/service';
 import { useNavigate } from 'react-router';
+import type { UserRegistration } from '../services/models';
+import { checkUserExists, registerUser } from '../services/service';
 import Layout from './Layout';
+import Header from './Header';
 
 function RegisterUser() {
     const navigate = useNavigate();
@@ -26,7 +27,8 @@ function RegisterUser() {
 
     async function checkEmailAlreadyTaken(email: string) {
         if (!email) return;
-        if (await getCurrentUser(email)) setEmailAlreadyTaken(true);
+        const data = await checkUserExists(email);
+        setEmailAlreadyTaken(data !== null && data.exists);
     }
 
     async function validateAndRegisterUser(e: React.SubmitEvent<HTMLFormElement>) {
@@ -37,8 +39,10 @@ function RegisterUser() {
     }
 
     return (
-        <form onSubmit={validateAndRegisterUser}>
-            <Layout>
+        <Layout>
+            <Header button={{ label: 'Login', action: () => navigate('/login') }} />
+
+            <form id='register-form' onSubmit={validateAndRegisterUser} className='flex flex-col gap-8'>
                 <div className="flex flex-col gap-2">
                     <label htmlFor="name">Full Name</label>
                     <InputText id="name" required aria-describedby="name-help"
@@ -79,12 +83,10 @@ function RegisterUser() {
                         }} />
                     <small id="password-help" className='text-xs'>Create your password.</small>
                 </div>
+            </form>
 
-                <div className="flex justify-center mt-8">
-                    <Button type='submit' label='Register' className='w-[50%]' />
-                </div>
-            </Layout>
-        </form>
+            <Button type='submit' form='register-form' label='Register' className='w-full self-center' />
+        </Layout>
     );
 }
 

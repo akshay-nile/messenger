@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router';
 import type { UserLogin } from '../services/models';
 import { loginUser } from '../services/service';
 import Layout from './Layout';
+import Header from './Header';
 
 function LoginUser() {
     const navigate = useNavigate();
@@ -15,13 +16,15 @@ function LoginUser() {
     async function validateAndLoginUser(e: React.SubmitEvent<HTMLFormElement>) {
         e.preventDefault();
         const isLoggedIn = await loginUser({ ...user, password: sha256(user.password) });
-        if (isLoggedIn) navigate('/messenger');
+        if (isLoggedIn) navigate('/messenger', { state: { email: user.email } });
         else setUser({ email: '', password: '' });
     }
 
     return (
-        <form onSubmit={validateAndLoginUser}>
-            <Layout>
+        <Layout>
+            <Header button={{ label: 'Register', action: () => navigate('/register') }} />
+
+            <form id="login-form" onSubmit={validateAndLoginUser} className='flex flex-col gap-8'>
                 <div className="flex flex-col gap-2">
                     <label htmlFor="email">Email ID</label>
                     <InputText id="email" required aria-describedby="email-help"
@@ -46,12 +49,10 @@ function LoginUser() {
                         }} />
                     <small id="password-help" className='text-xs'>Enter your password.</small>
                 </div>
+            </form>
 
-                <div className="flex justify-center mt-8">
-                    <Button type='submit' label='Login' className='w-[50%]' />
-                </div>
-            </Layout>
-        </form>
+            <Button type='submit' form='login-form' label='Login' className='w-full self-center' />
+        </Layout>
     );
 }
 
