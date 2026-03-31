@@ -1,6 +1,6 @@
 import type { Message, User, UserLogin, UserRegistration } from './models';
 
-let token: string | null = localStorage.getItem('token');
+let token: string | null = localStorage.getItem('messenger-token');
 
 export function isLoggedIn(): string | null {
     if (token) {
@@ -15,7 +15,7 @@ export function isLoggedIn(): string | null {
 
 export function logout() {
     token = null;
-    localStorage.removeItem('token');
+    localStorage.removeItem('messenger-token');
 }
 
 export async function registerUser(user: UserRegistration): Promise<{ registered: boolean }> {
@@ -38,7 +38,7 @@ export async function loginUser(user: UserLogin): Promise<boolean> {
         const data = await response.json();
         if (data && data.token) {
             token = data.token;
-            localStorage.setItem('token', data.token);
+            localStorage.setItem('messenger-token', data.token);
             return true;
         }
     }
