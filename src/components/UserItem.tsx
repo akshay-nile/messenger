@@ -14,12 +14,12 @@ function UserItem({ other, user }: Props) {
             <i className="pi pi-user p-overlay-badge me-4" style={{ fontSize: '2.25rem' }}>
                 {other.unseen > 0 && <Badge value={other.unseen} severity="danger" style={{ zoom: 0.8 }} />}
             </i>
-            <div className='w-full flex flex-col justify-center' onClick={() => navigate('/chat', { state: { other, user } })}>
-                <span className='text-lg font-bold group-hover:text-purple-800'>{other.name}</span>
-                <span className='text-xs font-medium'>{other.email}</span>
+            <div className="w-full flex flex-col justify-center" onClick={() => navigate('/chat', { state: { other, user } })}>
+                <span className="text-lg font-bold group-hover:text-purple-800">{other.name}</span>
+                <span className="text-xs font-medium">{other.email}</span>
             </div>
-            <div className='flex gap-2'>
-                <Button icon='pi pi-trash' raised rounded onClick={() => deleteChatThread(other.email)} />
+            <div className="flex gap-2">
+                <Button icon="pi pi-trash" raised rounded onClick={() => deleteChatThread(other.email)} />
             </div>
         </div>
     );

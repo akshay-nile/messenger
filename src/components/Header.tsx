@@ -7,12 +7,12 @@ type Props = {
 
 function Header({ title, button }: Props) {
     return (
-        <header className='flex gap-4 justify-between'>
-            <div className='flex gap-4 items-center'>
-                <img src='./favicon.png' width={50} />
-                <span className='font-bold text-xl'>{title ?? 'Messenger'}</span>
+        <header className="flex gap-4 justify-between">
+            <div className="flex gap-4 items-center">
+                <img src="./favicon.png" width={50} />
+                <span className="font-bold text-xl">{title ?? 'Messenger'}</span>
             </div>
-            <Button label={button.label} size='small' onClick={button.action} />
+            <Button label={button.label} size="small" onClick={button.action} />
         </header>
     );
 }

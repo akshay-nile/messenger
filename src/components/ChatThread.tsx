@@ -55,7 +55,7 @@ function ChatThread() {
 
             {
                 loading
-                    ? <ProgressSpinner style={loaderStyle} strokeWidth='0.15rem' animationDuration='0.5s' />
+                    ? <ProgressSpinner style={loaderStyle} strokeWidth="0.15rem" animationDuration="0.5s" />
                     : <ul>{
                         chatThread.map((message, i) =>
                             <li key={message.timestamp}>
@@ -67,7 +67,7 @@ function ChatThread() {
             }
 
             <div className="p-inputgroup flex">
-                <InputText placeholder='Type your message...' className='w-full'
+                <InputText placeholder="Type your message..." className="w-full"
                     value={message}
                     onChange={e => setMessage(e.target.value)}
                     onKeyDown={onEnterOrEscapeKey} />

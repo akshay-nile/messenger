@@ -42,13 +42,13 @@ function RegisterUser() {
         <Layout>
             <Header button={{ label: 'Login', action: () => navigate('/login') }} />
 
-            <form id='register-form' onSubmit={validateAndRegisterUser} className='flex flex-col gap-8'>
+            <form id="register-form" onSubmit={validateAndRegisterUser} className="flex flex-col gap-8">
                 <div className="flex flex-col gap-2">
                     <label htmlFor="name">Full Name</label>
                     <InputText id="name" required aria-describedby="name-help"
                         value={user.name}
                         onChange={e => setUser({ ...user, name: titleCase(e.target.value), email: guessEmail(e.target.value) })} />
-                    <small id="name-help" className='text-xs'>Enter your firstname and lastname.</small>
+                    <small id="name-help" className="text-xs">Enter your firstname and lastname.</small>
                 </div>
 
                 <div className="flex flex-col gap-2">
@@ -60,10 +60,10 @@ function RegisterUser() {
                         onBlur={e => checkEmailAlreadyTaken(e.target.value.trim())} />
                     {
                         emailAlreadyTaken
-                            ? <small id="email-help" className='text-xs text-red-400'>
+                            ? <small id="email-help" className="text-xs text-red-400">
                                 User with this email id already exists.
                             </small>
-                            : <small id="email-help" className='text-xs'>Enter your email id.</small>
+                            : <small id="email-help" className="text-xs">Enter your email id.</small>
                     }
                 </div>
 
@@ -81,11 +81,11 @@ function RegisterUser() {
                             showIcon: { className: 'absolute right-2 cursor-pointer flex items-center justify-center' },
                             hideIcon: { className: 'absolute right-2 cursor-pointer flex items-center justify-center' }
                         }} />
-                    <small id="password-help" className='text-xs'>Create your password.</small>
+                    <small id="password-help" className="text-xs">Create your password.</small>
                 </div>
             </form>
 
-            <Button type='submit' form='register-form' label='Register' className='w-full self-center' />
+            <Button type="submit" form="register-form" label="Register" className="w-full self-center" />
         </Layout>
     );
 }

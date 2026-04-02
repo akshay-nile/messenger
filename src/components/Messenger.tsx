@@ -35,7 +35,7 @@ function Messenger() {
 
             {
                 loading
-                    ? <ProgressSpinner style={loaderStyle} strokeWidth='0.15rem' animationDuration='0.5s' />
+                    ? <ProgressSpinner style={loaderStyle} strokeWidth="0.15rem" animationDuration="0.5s" />
                     : <ul>{users.map(other => <li key={other.email}><UserItem other={other} user={user!} /></li>)}</ul>
             }
 

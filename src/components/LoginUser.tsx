@@ -26,13 +26,13 @@ function LoginUser() {
         <Layout>
             <Header button={{ label: 'Register', action: () => navigate('/register') }} />
 
-            <form id="login-form" onSubmit={validateAndLoginUser} className='flex flex-col gap-8'>
+            <form id="login-form" onSubmit={validateAndLoginUser} className="flex flex-col gap-8">
                 <div className="flex flex-col gap-2">
                     <label htmlFor="email">Email ID</label>
                     <InputText id="email" required aria-describedby="email-help"
                         value={user.email.toLowerCase()}
                         onChange={e => setUser({ ...user, email: e.target.value })} />
-                    <small id="email-help" className='text-xs'>Enter your email id.</small>
+                    <small id="email-help" className="text-xs">Enter your email id.</small>
                 </div>
 
                 <div className="flex flex-col gap-2">
@@ -49,11 +49,11 @@ function LoginUser() {
                             showIcon: { className: 'absolute right-2 cursor-pointer flex items-center justify-center' },
                             hideIcon: { className: 'absolute right-2 cursor-pointer flex items-center justify-center' }
                         }} />
-                    <small id="password-help" className='text-xs'>Enter your password.</small>
+                    <small id="password-help" className="text-xs">Enter your password.</small>
                 </div>
             </form>
 
-            <Button type='submit' form='login-form' label='Login' className='w-full self-center' />
+            <Button type="submit" form="login-form" label="Login" className="w-full self-center" />
         </Layout>
     );
 }
