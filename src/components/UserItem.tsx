@@ -15,7 +15,7 @@ function UserItem({ other, user }: Props) {
                 {other.unseen > 0 && <Badge value={other.unseen} severity="danger" style={{ zoom: 0.8 }} />}
             </i>
             <div className="w-full flex flex-col justify-center" onClick={() => navigate('/chat', { state: { other, user } })}>
-                <span className="text-lg font-bold group-hover:text-purple-800">{other.name}</span>
+                <span className="text-lg font-bold group-hover:text-blue-700">{other.name}</span>
                 <span className="text-xs font-medium">{other.email}</span>
             </div>
             <div className="flex gap-2">

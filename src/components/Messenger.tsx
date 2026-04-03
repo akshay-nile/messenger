@@ -31,7 +31,10 @@ function Messenger() {
 
     return (
         <Layout>
-            <Header title={user?.name} button={{ label: 'Logout', action: () => { logout(); navigate('/login'); } }} />
+            <Header
+                title={user?.name}
+                subtitle="Select the user to start chatting"
+                button={{ label: 'Logout', action: () => { logout(); navigate('/login'); } }} />
 
             {
                 loading

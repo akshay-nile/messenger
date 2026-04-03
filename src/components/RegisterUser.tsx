@@ -40,9 +40,11 @@ function RegisterUser() {
 
     return (
         <Layout>
-            <Header button={{ label: 'Login', action: () => navigate('/login') }} />
+            <Header
+                subtitle="Create a new user account"
+                button={{ label: 'Login', action: () => navigate('/login') }} />
 
-            <form id="register-form" onSubmit={validateAndRegisterUser} className="flex flex-col gap-8">
+            <form id="register-form" onSubmit={validateAndRegisterUser} className="flex flex-col gap-8 bg-gray-100 px-4 py-5 text-black rounded-lg">
                 <div className="flex flex-col gap-2">
                     <label htmlFor="name">Full Name</label>
                     <InputText id="name" required aria-describedby="name-help"

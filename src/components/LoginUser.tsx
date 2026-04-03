@@ -22,16 +22,23 @@ function LoginUser() {
         else setUser({ email: '', password: '' });
     }
 
+    function appendEmail(email: string): string {
+        if (email.endsWith('@')) return email + 'email.com';
+        return email;
+    }
+
     return (
         <Layout>
-            <Header button={{ label: 'Register', action: () => navigate('/register') }} />
+            <Header
+                subtitle="Login to an existing account"
+                button={{ label: 'Register', action: () => navigate('/register') }} />
 
-            <form id="login-form" onSubmit={validateAndLoginUser} className="flex flex-col gap-8">
+            <form id="login-form" onSubmit={validateAndLoginUser} className="flex flex-col gap-8 bg-gray-100 px-4 py-5 text-black rounded-lg">
                 <div className="flex flex-col gap-2">
                     <label htmlFor="email">Email ID</label>
                     <InputText id="email" required aria-describedby="email-help"
                         value={user.email.toLowerCase()}
-                        onChange={e => setUser({ ...user, email: e.target.value })} />
+                        onChange={e => setUser({ ...user, email: appendEmail(e.target.value) })} />
                     <small id="email-help" className="text-xs">Enter your email id.</small>
                 </div>
 

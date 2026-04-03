@@ -51,7 +51,10 @@ function ChatThread() {
 
     return (
         <Layout>
-            <Header title={location.state.other.name} button={{ label: 'Close', action: () => navigate(-1) }} />
+            <Header
+                title={location.state.user.name}
+                subtitle={'Your chatting with ' + location.state.other.name}
+                button={{ label: 'Close', action: () => navigate(-1) }} />
 
             {
                 loading

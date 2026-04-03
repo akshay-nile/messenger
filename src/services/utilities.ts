@@ -14,7 +14,7 @@ export function getDateTime(timestamp: number): [string, string] {
     const year = date.getFullYear();
 
     const hours24 = date.getHours();
-    const minutes = String(date.getMinutes());
+    const minutes = String(date.getMinutes()).padStart(2, '0');
 
     const ampm = hours24 >= 12 ? 'PM' : 'AM';
     const hours12 = String(hours24 % 12 || 12);
