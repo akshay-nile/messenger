@@ -1,16 +1,18 @@
 import { useCallback, useEffect, useRef } from 'react';
-import { getSDP, postSDP, sendMessage, waitForIceGatheringCompletion } from '../services/connex';
+import { clearSDP, getSDP, postSDP, sendMessage, waitForIceGatheringCompletion } from '../services/connex';
 import type { Status } from '../services/models';
 
-function useStatusExchange(email: string, onStatusReceived: (status: Status) => void) {
+function useStatusExchange(email: string, other: string, onStatusReceived: (status: Status) => void) {
     const pcRef = useRef<RTCPeerConnection>(null);
     const dcRef = useRef<RTCDataChannel>(null);
+    const pollingRef = useRef<boolean>(true);
 
     const sendStatus = useCallback((status: Status) => {
         if (dcRef.current) sendMessage(dcRef.current, status);
     }, []);
 
     const disconnect = useCallback(() => {
+        pollingRef.current = false;
         if (dcRef.current) {
             sendStatus('offline');
             onStatusReceived('offline');
@@ -20,7 +22,7 @@ function useStatusExchange(email: string, onStatusReceived: (status: Status) => 
         if (pcRef.current) {
             pcRef.current.close();
             pcRef.current = null;
-            postSDP(null, '');
+            clearSDP();
         }
     }, [onStatusReceived, sendStatus]);
 
@@ -31,7 +33,7 @@ function useStatusExchange(email: string, onStatusReceived: (status: Status) => 
             pcRef.current = pc;
             dcRef.current = dc;
             onStatusReceived('online');
-            postSDP(null, email);
+            clearSDP();
         };
 
         function onMessage(status: Status) {
@@ -63,18 +65,23 @@ function useStatusExchange(email: string, onStatusReceived: (status: Status) => 
             }
 
             await waitForIceGatheringCompletion(pc);
-            const isPosted = await postSDP(pc.localDescription, email);
+            pollingRef.current = await postSDP(pc.localDescription, email);
 
-            while (isPosted && pc.remoteDescription === null) {
+            while (pollingRef.current && pc.remoteDescription === null) {
                 await new Promise(resolve => setTimeout(resolve, 3000));
                 const answer = await getSDP('answer', email);
-                if (answer) await pc.setRemoteDescription(answer.sdp);
+                if (answer && answer.email === other) await pc.setRemoteDescription(answer.sdp);
+            }
+
+            if (pc.remoteDescription === null) {
+                pc.close();
+                disconnect();
             }
         }
 
         connect();
         return disconnect;
-    }, [email, onStatusReceived, disconnect]);
+    }, [email, other, onStatusReceived, disconnect]);
 
     return { sendStatus, disconnect };
 }

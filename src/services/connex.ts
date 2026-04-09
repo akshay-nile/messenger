@@ -21,6 +21,11 @@ export async function postSDP(sdp: RTCSessionDescription | null, email: string):
     return data.email == email;
 }
 
+export async function clearSDP(): Promise<boolean> {
+    const response = await fetch(baseURL, { method: 'DELETE' });
+    return response.ok;
+}
+
 export async function waitForIceGatheringCompletion(pc: RTCPeerConnection): Promise<void> {
     return await new Promise(resolve => {
         function checkIceGatheringState() {

@@ -25,12 +25,14 @@ function ChatThread() {
         if (data) setChatThread(prev => [...prev, ...data]);
     }, [location.state.other.email]);
 
-    const onStatusReceived = useCallback(async (status: Status) => {
-        setStatus(status);
-        if (status === 'refresh') await refreshChatThread();
-    }, [refreshChatThread]);
-
-    const { sendStatus, disconnect } = useStatusExchange(location.state.user.email, onStatusReceived);
+    const { sendStatus, disconnect } = useStatusExchange(
+        location.state.user.email,
+        location.state.other.email,
+        useCallback(async (status: Status) => {
+            setStatus(status);
+            if (status === 'refresh') await refreshChatThread();
+        }, [refreshChatThread])
+    );
 
     useEffect(() => {
         sendStatus(message.length > 0 ? 'typing' : 'online');
