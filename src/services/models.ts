@@ -21,3 +21,10 @@ export interface Message {
     delivered: boolean,
     timestamp: number
 }
+
+export interface SDP {
+    email: string,
+    sdp: RTCSessionDescription,
+}
+
+export type Status = 'online' | 'typing' | 'refresh' | 'offline';

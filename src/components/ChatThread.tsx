@@ -1,9 +1,10 @@
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
 import { ProgressSpinner } from 'primereact/progressspinner';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
-import type { Message } from '../services/models';
+import useStatusExchange from '../hooks/useStatusExchange';
+import type { Message, Status } from '../services/models';
 import { getChatThread, sendMessage } from '../services/service';
 import { loaderStyle } from '../services/utilities';
 import Header from './Header';
@@ -14,30 +15,48 @@ function ChatThread() {
     const navigate = useNavigate();
     const location = useLocation();
 
+    const [status, setStatus] = useState<Status>('offline');
     const [loading, setLoading] = useState<boolean>(true);
     const [message, setMessage] = useState<string>('');
     const [chatThread, setChatThread] = useState<Message[]>([]);
 
+    const refreshChatThread = useCallback(async () => {
+        const data = await getChatThread(location.state.other.email, true);
+        if (data) setChatThread(prev => [...prev, ...data]);
+    }, [location.state.other.email]);
+
+    const onStatusReceived = useCallback(async (status: Status) => {
+        setStatus(status);
+        if (status === 'refresh') await refreshChatThread();
+    }, [refreshChatThread]);
+
+    const { sendStatus, disconnect } = useStatusExchange(location.state.user.email, onStatusReceived);
+
     useEffect(() => {
+        sendStatus(message.length > 0 ? 'typing' : 'online');
+    }, [message, sendStatus]);
+
+    useEffect(() => {
+        let cleanup = false;
+
         (async () => {
             setLoading(true);
             const data = await getChatThread(location.state.other.email);
             if (data) setChatThread(data);
             setLoading(false);
+            cleanup = true;
         })();
-    }, [location.state.other.email]);
+
+        if (cleanup) return disconnect;
+    }, [location.state.other.email, disconnect]);
 
     async function validateAndSendMessage() {
         const data = await sendMessage(location.state.other.email, message);
         if (data) {
             setChatThread(prev => [...prev, data]);
+            sendStatus('refresh');
             setMessage('');
         }
-    }
-
-    async function refreshChatThread() {
-        const data = await getChatThread(location.state.other.email, true);
-        if (data) setChatThread(prev => [...prev, ...data]);
     }
 
     function onEnterOrEscapeKey(e: React.KeyboardEvent<HTMLInputElement>) {
@@ -52,8 +71,8 @@ function ChatThread() {
     return (
         <Layout>
             <Header
-                title={location.state.user.name}
-                subtitle={'Your chatting with ' + location.state.other.name}
+                title={location.state.other.name}
+                subtitle={status + (status === 'typing' ? '...' : '')}
                 button={{ label: 'Close', action: () => navigate(-1) }} />
 
             {
