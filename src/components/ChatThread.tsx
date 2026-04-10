@@ -7,6 +7,7 @@ import useStatusExchange from '../hooks/useStatusExchange';
 import type { Message, Status } from '../services/models';
 import { getChatThread, sendMessage } from '../services/service';
 import { loaderStyle } from '../services/utilities';
+import Footer from './Footer';
 import Header from './Header';
 import Layout from './Layout';
 import MessageItem from './MessageItem';
@@ -22,7 +23,10 @@ function ChatThread() {
 
     const refreshChatThread = useCallback(async () => {
         const data = await getChatThread(location.state.other.email, true);
-        if (data) setChatThread(prev => [...prev, ...data]);
+        if (data) {
+            setChatThread(prev => [...prev, ...data]);
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        }
     }, [location.state.other.email]);
 
     const { sendStatus, disconnect } = useStatusExchange(
@@ -46,6 +50,7 @@ function ChatThread() {
             const data = await getChatThread(location.state.other.email);
             if (data) setChatThread(data);
             setLoading(false);
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
             cleanup = true;
         })();
 
@@ -58,6 +63,7 @@ function ChatThread() {
             setChatThread(prev => [...prev, data]);
             sendStatus('refresh');
             setMessage('');
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
         }
     }
 
@@ -74,30 +80,35 @@ function ChatThread() {
         <Layout>
             <Header
                 title={location.state.other.name}
-                subtitle={status + (status === 'typing' ? '...' : '')}
+                subtitle={status + (status === 'typing' || status === 'speaking' ? '...' : '')}
                 button={{ label: 'Close', action: () => navigate(-1) }} />
 
             {
                 loading
                     ? <ProgressSpinner style={loaderStyle} strokeWidth="0.15rem" animationDuration="0.5s" />
-                    : <ul>{
-                        chatThread.map((message, i) =>
-                            <li key={message.timestamp}>
-                                <MessageItem message={message} other={location.state.other}
-                                    showName={i > 0 ? chatThread[i - 1].sender !== message.sender : true} />
-                            </li>)
-                    }</ul>
+                    : <ul className="mx-8 my-auto overflow-y-hidden">
+                        {
+                            chatThread.map((message, i) =>
+                                <li key={message.timestamp}>
+                                    <MessageItem message={message} other={location.state.other}
+                                        showName={i > 0 ? chatThread[i - 1].sender !== message.sender : true} />
+                                </li>
+                            )
+                        }
+                    </ul>
 
             }
 
-            <div className="p-inputgroup flex">
-                <InputText placeholder="Type your message..." className="w-full"
-                    value={message}
-                    onChange={e => setMessage(e.target.value)}
-                    onKeyDown={onEnterOrEscapeKey} />
-                <Button icon={`pi ${message.trim().length > 0 ? 'pi-arrow-up' : 'pi-arrow-down'}`}
-                    onClick={() => message.trim().length > 0 ? validateAndSendMessage() : refreshChatThread()} />
-            </div>
+            <Footer>
+                <div className="p-inputgroup flex">
+                    <InputText placeholder="Type your message..." className="w-full"
+                        value={message}
+                        onChange={e => setMessage(e.target.value)}
+                        onKeyDown={onEnterOrEscapeKey} />
+                    <Button icon={`pi ${message.trim().length > 0 ? 'pi-arrow-up' : 'pi-arrow-down'}`}
+                        onClick={() => message.trim().length > 0 ? validateAndSendMessage() : refreshChatThread()} />
+                </div>
+            </Footer>
         </Layout>
     );
 }

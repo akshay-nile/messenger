@@ -6,8 +6,9 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import type { UserRegistration } from '../services/models';
 import { checkUserExists, registerUser } from '../services/service';
-import Layout from './Layout';
+import Footer from './Footer';
 import Header from './Header';
+import Layout from './Layout';
 
 function RegisterUser() {
     const navigate = useNavigate();
@@ -44,7 +45,7 @@ function RegisterUser() {
                 subtitle="Create a new user account"
                 button={{ label: 'Login', action: () => navigate('/login') }} />
 
-            <form id="register-form" onSubmit={validateAndRegisterUser} className="flex flex-col gap-8 bg-gray-100 px-4 py-5 text-black rounded-lg">
+            <form id="register-form" onSubmit={validateAndRegisterUser} className="flex flex-col gap-8 bg-gray-100 px-4 py-5 mx-6 text-black rounded-lg">
                 <div className="flex flex-col gap-2">
                     <label htmlFor="name">Full Name</label>
                     <InputText id="name" required aria-describedby="name-help"
@@ -87,7 +88,9 @@ function RegisterUser() {
                 </div>
             </form>
 
-            <Button type="submit" form="register-form" label="Register" className="w-full self-center" />
+            <Footer>
+                <Button type="submit" form="register-form" label="Register" className="w-full self-center" />
+            </Footer>
         </Layout>
     );
 }

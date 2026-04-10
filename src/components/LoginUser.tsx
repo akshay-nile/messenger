@@ -6,8 +6,9 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import type { UserLogin } from '../services/models';
 import { isLoggedIn, loginUser } from '../services/service';
-import Layout from './Layout';
+import Footer from './Footer';
 import Header from './Header';
+import Layout from './Layout';
 
 function LoginUser() {
     const navigate = useNavigate();
@@ -33,7 +34,7 @@ function LoginUser() {
                 subtitle="Login to an existing account"
                 button={{ label: 'Register', action: () => navigate('/register') }} />
 
-            <form id="login-form" onSubmit={validateAndLoginUser} className="flex flex-col gap-8 bg-gray-100 px-4 py-5 text-black rounded-lg">
+            <form id="login-form" onSubmit={validateAndLoginUser} className="flex flex-col gap-8 bg-gray-100 px-4 py-5 mx-6 text-black rounded-lg">
                 <div className="flex flex-col gap-2">
                     <label htmlFor="email">Email ID</label>
                     <InputText id="email" required aria-describedby="email-help"
@@ -60,7 +61,9 @@ function LoginUser() {
                 </div>
             </form>
 
-            <Button type="submit" form="login-form" label="Login" className="w-full self-center" />
+            <Footer>
+                <Button type="submit" form="login-form" label="Login" className="w-full self-center" />
+            </Footer>
         </Layout>
     );
 }

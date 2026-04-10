@@ -10,7 +10,7 @@ function UserItem({ other, user }: Props) {
     const navigate = useNavigate();
 
     return (
-        <div className="flex justify-between items-center my-4 px-4 py-3 bg-gray-100 text-black rounded-lg hover:cursor-pointer shadow-xl group">
+        <div className="flex justify-between items-center my-6 px-4 py-3 bg-gray-100 text-black rounded-lg hover:cursor-pointer shadow-xl group">
             <i className="pi pi-user p-overlay-badge me-4" style={{ fontSize: '2.25rem' }}>
                 {other.unseen > 0 && <Badge value={other.unseen} severity="danger" style={{ zoom: 0.8 }} />}
             </i>

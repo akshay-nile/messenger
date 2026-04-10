@@ -27,4 +27,4 @@ export interface SDP {
     sdp: RTCSessionDescription,
 }
 
-export type Status = 'online' | 'typing' | 'refresh' | 'offline';
+export type Status = 'online' | 'typing' | 'speaking' | 'refresh' | 'offline';

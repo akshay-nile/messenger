@@ -39,10 +39,16 @@ function Messenger() {
             {
                 loading
                     ? <ProgressSpinner style={loaderStyle} strokeWidth="0.15rem" animationDuration="0.5s" />
-                    : <ul>{users.map(other => <li key={other.email}><UserItem other={other} user={user!} /></li>)}</ul>
+                    : <ul className="mx-6 my-auto overflow-y-hidden">
+                        {
+                            users.map(other =>
+                                <li key={other.email}>
+                                    <UserItem other={other} user={user!} />
+                                </li>
+                            )
+                        }
+                    </ul>
             }
-
-            <div></div>
         </Layout>
     );
 }
