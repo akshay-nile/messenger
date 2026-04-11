@@ -21,3 +21,9 @@ export function getDateTime(timestamp: number): [string, string] {
 
     return [`${day}-${month}-${year}`, `${hours12}:${minutes} ${ampm}`];
 }
+
+export function scrollToBottom() {
+    setTimeout(() => {
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    }, 100);
+}

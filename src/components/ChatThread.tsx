@@ -6,7 +6,7 @@ import { useLocation, useNavigate } from 'react-router';
 import useStatusExchange from '../hooks/useStatusExchange';
 import type { Message, Status } from '../services/models';
 import { getChatThread, sendMessage } from '../services/service';
-import { loaderStyle } from '../services/utilities';
+import { loaderStyle, scrollToBottom } from '../services/utilities';
 import Footer from './Footer';
 import Header from './Header';
 import Layout from './Layout';
@@ -25,7 +25,7 @@ function ChatThread() {
         const data = await getChatThread(location.state.other.email, true);
         if (data) {
             setChatThread(prev => [...prev, ...data]);
-            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+            scrollToBottom();
         }
     }, [location.state.other.email]);
 
@@ -50,7 +50,7 @@ function ChatThread() {
             const data = await getChatThread(location.state.other.email);
             if (data) setChatThread(data);
             setLoading(false);
-            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+            scrollToBottom();
             cleanup = true;
         })();
 
@@ -63,7 +63,7 @@ function ChatThread() {
             setChatThread(prev => [...prev, data]);
             sendStatus('refresh');
             setMessage('');
-            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+            scrollToBottom();
         }
     }
 

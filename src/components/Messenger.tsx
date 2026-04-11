@@ -33,7 +33,7 @@ function Messenger() {
         <Layout>
             <Header
                 title={user?.name}
-                subtitle="Select the user to start chatting"
+                subtitle="Select the user to open chat"
                 button={{ label: 'Logout', action: () => { logout(); navigate('/login'); } }} />
 
             {
