@@ -18,8 +18,12 @@ function ChatThread() {
 
     const [status, setStatus] = useState<Status>('offline');
     const [loading, setLoading] = useState<boolean>(true);
+    const [typing, setTyping] = useState<boolean>(false);
+    const [speaking, setSpeaking] = useState<boolean>(false);
     const [message, setMessage] = useState<string>('');
     const [chatThread, setChatThread] = useState<Message[]>([]);
+
+    useEffect(() => { setTyping(message.trim().length > 0); }, [message]);
 
     const refreshChatThread = useCallback(async () => {
         const data = await getChatThread(location.state.other.email, true);
@@ -76,11 +80,16 @@ function ChatThread() {
         if (e.key === 'Escape' || e.key === 'Esc') setMessage('');
     }
 
+    function sendSpeaking(enabled: boolean) {
+        sendStatus(enabled ? 'speaking' : 'online');
+        setSpeaking(enabled);
+    }
+
     return (
         <Layout>
             <Header
                 title={location.state.other.name}
-                subtitle={status + (status === 'typing' || status === 'speaking' ? '...' : '')}
+                subtitle={status}
                 button={{ label: 'Close', action: () => navigate(-1) }} />
 
             {
@@ -101,12 +110,21 @@ function ChatThread() {
 
             <Footer>
                 <div className="p-inputgroup flex">
-                    <InputText placeholder="Type your message..." className="w-full"
+                    <InputText className="w-full"
                         value={message}
                         onChange={e => setMessage(e.target.value)}
-                        onKeyDown={onEnterOrEscapeKey} />
-                    <Button icon={`pi ${message.trim().length > 0 ? 'pi-arrow-up' : 'pi-arrow-down'}`}
-                        onClick={() => message.trim().length > 0 ? validateAndSendMessage() : refreshChatThread()} />
+                        onKeyDown={onEnterOrEscapeKey}
+                        disabled={speaking}
+                        placeholder={speaking ? 'Speak now...' : 'Type your message...'} />
+                    {
+                        (typing || status === 'offline')
+                            ? <Button icon={`pi ${typing ? 'pi-arrow-up' : 'pi-arrow-down'}`}
+                                onClick={() => typing ? validateAndSendMessage() : refreshChatThread()} />
+                            : <Button icon="pi pi-microphone"
+                                onMouseDown={() => sendSpeaking(true)} onTouchStart={() => sendSpeaking(true)}
+                                onMouseUp={() => sendSpeaking(false)} onTouchEnd={() => sendSpeaking(false)}
+                                onMouseLeave={() => sendSpeaking(false)} />
+                    }
                 </div>
             </Footer>
         </Layout>

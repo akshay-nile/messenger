@@ -5,14 +5,20 @@ import type { Status } from '../services/models';
 function useStatusExchange(email: string, other: string, onStatusReceived: (status: Status) => void) {
     const pcRef = useRef<RTCPeerConnection>(null);
     const dcRef = useRef<RTCDataChannel>(null);
+    const msRef = useRef<MediaStream>(null);
     const pollingRef = useRef<boolean>(true);
 
     const sendStatus = useCallback((status: Status) => {
         if (dcRef.current) sendMessage(dcRef.current, status);
+        if (msRef.current) msRef.current.getAudioTracks().forEach(track => track.enabled = status === 'speaking');
     }, []);
 
     const disconnect = useCallback(() => {
         pollingRef.current = false;
+        if (msRef.current) {
+            msRef.current.getTracks().forEach(track => track.stop());
+            msRef.current = null;
+        }
         if (dcRef.current) {
             sendStatus('offline');
             onStatusReceived('offline');
@@ -29,9 +35,10 @@ function useStatusExchange(email: string, other: string, onStatusReceived: (stat
     useEffect(() => {
         onStatusReceived('offline');
 
-        function onOpen(pc: RTCPeerConnection, dc: RTCDataChannel) {
+        function onOpen(pc: RTCPeerConnection, dc: RTCDataChannel, ms: MediaStream) {
             pcRef.current = pc;
             dcRef.current = dc;
+            msRef.current = ms;
             onStatusReceived('online');
             clearSDP();
         };
@@ -43,23 +50,32 @@ function useStatusExchange(email: string, other: string, onStatusReceived: (stat
 
         async function connect() {
             const pc = new RTCPeerConnection();
+
+            pc.ontrack = (e: RTCTrackEvent) => {
+                const audio = new Audio();
+                audio.srcObject = e.streams[0];
+                audio.autoplay = true;
+            };
             pc.onconnectionstatechange = () => {
                 const states = ['closed', 'disconnected', 'failed', undefined];
                 if (states.includes(pc.connectionState)) disconnect();
             };
 
+            const ms = msRef.current ?? await navigator.mediaDevices.getUserMedia({ audio: true });
+            ms.getAudioTracks().forEach(track => { pc.addTrack(track, ms); track.enabled = false; });
+
             const offer = await getSDP('offer', email);
             if (offer) {
                 pc.ondatachannel = (e: RTCDataChannelEvent) => {
                     const dc = e.channel;
-                    dc.onopen = () => onOpen(pc, dc);
+                    dc.onopen = () => onOpen(pc, dc, ms);
                     dc.onmessage = (e: MessageEvent<Status>) => onMessage(e.data);
                 };
                 await pc.setRemoteDescription(offer.sdp);
                 await pc.setLocalDescription(await pc.createAnswer());
             } else {
                 const dc = pc.createDataChannel('STATUS');
-                dc.onopen = () => onOpen(pc, dc);
+                dc.onopen = () => onOpen(pc, dc, ms);
                 dc.onmessage = (e: MessageEvent<Status>) => onMessage(e.data);
                 await pc.setLocalDescription(await pc.createOffer());
             }
@@ -75,6 +91,7 @@ function useStatusExchange(email: string, other: string, onStatusReceived: (stat
 
             if (pc.remoteDescription === null) {
                 pc.close();
+                ms.getTracks().forEach(track => track.stop());
                 disconnect();
             }
         }
