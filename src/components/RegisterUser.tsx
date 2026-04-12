@@ -9,9 +9,11 @@ import { checkUserExists, registerUser } from '../services/service';
 import Footer from './Footer';
 import Header from './Header';
 import Layout from './Layout';
+import { useToastMessage } from '../contexts/ToastMessage/useToastMessage';
 
 function RegisterUser() {
     const navigate = useNavigate();
+    const toast = useToastMessage();
 
     const [user, setUser] = useState<UserRegistration>({ name: '', email: '', password: '' });
     const [emailAlreadyTaken, setEmailAlreadyTaken] = useState<boolean>(false);
@@ -37,6 +39,7 @@ function RegisterUser() {
         if (emailAlreadyTaken) return;
         const data = await registerUser({ ...user, password: sha256(user.password) });
         if (data && data.registered) navigate('/login');
+        else toast.showMessage({ severity: 'error', summary: 'Registration Failed', detail: JSON.stringify(data) });
     }
 
     return (

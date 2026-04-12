@@ -1,6 +1,7 @@
 import { ProgressSpinner } from 'primereact/progressspinner';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
+import { useToastMessage } from '../contexts/ToastMessage/useToastMessage';
 import type { User } from '../services/models';
 import { getAllUsers, isLoggedIn, logout } from '../services/service';
 import { loaderStyle } from '../services/utilities';
@@ -10,6 +11,7 @@ import UserItem from './UserItem';
 
 function Messenger() {
     const navigate = useNavigate();
+    const toast = useToastMessage();
 
     const [user, setUser] = useState<User>();
     const [users, setUsers] = useState<User[]>([]);
@@ -24,10 +26,10 @@ function Messenger() {
             if (data) {
                 setUser(data.find(u => u.email === email));
                 setUsers(data.filter(u => u.email !== email));
-            }
+            } else toast.showMessage({ severity: 'error', summary: 'No Users Found', detail: JSON.stringify(data) });
             setLoading(false);
         })();
-    }, [navigate]);
+    }, [navigate, toast]);
 
     return (
         <Layout>

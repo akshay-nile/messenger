@@ -1,11 +1,11 @@
-import type { Message, User, UserLogin, UserRegistration } from './models';
+import { jwtDecode } from 'jwt-decode';
+import type { Message, Payload, User, UserLogin, UserRegistration } from './models';
 
 let token: string | null = localStorage.getItem('messenger-token');
 
 export function isLoggedIn(): string | null {
     if (token) {
-        const segment = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
-        const payload = JSON.parse(atob(segment + '='.repeat(segment.length % 4)));
+        const payload = jwtDecode<Payload>(token);
         if (payload.exp * 1000 > Date.now()) return payload.email;
         else logout();
     }

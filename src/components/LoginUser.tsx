@@ -4,6 +4,7 @@ import { InputText } from 'primereact/inputtext';
 import { Password } from 'primereact/password';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
+import { useToastMessage } from '../contexts/ToastMessage/useToastMessage';
 import type { UserLogin } from '../services/models';
 import { isLoggedIn, loginUser } from '../services/service';
 import Footer from './Footer';
@@ -12,6 +13,8 @@ import Layout from './Layout';
 
 function LoginUser() {
     const navigate = useNavigate();
+    const toast = useToastMessage();
+
     const [user, setUser] = useState<UserLogin>({ email: '', password: '' });
 
     useEffect(() => { if (isLoggedIn()) navigate('/messenger'); }, [navigate]);
@@ -20,11 +23,11 @@ function LoginUser() {
         e.preventDefault();
         const loggedIn = await loginUser({ ...user, password: sha256(user.password) });
         if (loggedIn) navigate('/messenger');
-        else setUser({ email: '', password: '' });
+        else toast.showMessage({ severity: 'error', summary: 'Login Failed', detail: 'Email or Password is incorrect' });
     }
 
     function appendEmail(email: string): string {
-        if (email.endsWith('@')) return email + 'email.com';
+        if (email.trim().length && email.endsWith('@')) return email + 'email.com';
         return email;
     }
 

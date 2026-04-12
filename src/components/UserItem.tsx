@@ -1,13 +1,15 @@
 import { Badge } from 'primereact/badge';
 import { Button } from 'primereact/button';
-import type { User } from '../services/models';
 import { useNavigate } from 'react-router';
+import { useToastMessage } from '../contexts/ToastMessage/useToastMessage';
+import type { User } from '../services/models';
 import { deleteChatThread } from '../services/service';
 
 type Props = { other: User, user: User };
 
 function UserItem({ other, user }: Props) {
     const navigate = useNavigate();
+    const toast = useToastMessage();
 
     return (
         <div className="flex justify-between items-center my-6 px-4 py-3 bg-gray-100 text-black rounded-lg hover:cursor-pointer shadow-xl group">
@@ -19,7 +21,11 @@ function UserItem({ other, user }: Props) {
                 <span className="text-xs font-medium">{other.email}</span>
             </div>
             <div className="flex gap-2">
-                <Button icon="pi pi-trash" raised rounded onClick={() => deleteChatThread(other.email)} />
+                <Button icon="pi pi-trash" raised rounded onClick={async () => {
+                    const data = await deleteChatThread(other.email);
+                    if (data) toast.showMessage({ severity: 'success', summary: 'Chat History Deleted' });
+                    else toast.showMessage({ severity: 'error', summary: 'Failed to Delete Chat' });
+                }} />
             </div>
         </div>
     );

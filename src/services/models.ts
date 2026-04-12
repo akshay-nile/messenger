@@ -22,6 +22,12 @@ export interface Message {
     timestamp: number
 }
 
+export interface Payload {
+    exp: number,
+    iat: number,
+    email: string
+}
+
 export interface SDP {
     email: string,
     sdp: RTCSessionDescription,
