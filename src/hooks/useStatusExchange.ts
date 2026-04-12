@@ -35,10 +35,9 @@ function useStatusExchange(email: string, other: string, onStatusReceived: (stat
     useEffect(() => {
         onStatusReceived('offline');
 
-        function onOpen(pc: RTCPeerConnection, dc: RTCDataChannel, ms: MediaStream) {
+        function onOpen(pc: RTCPeerConnection, dc: RTCDataChannel) {
             pcRef.current = pc;
             dcRef.current = dc;
-            msRef.current = ms;
             onStatusReceived('online');
             clearSDP();
         };
@@ -61,21 +60,24 @@ function useStatusExchange(email: string, other: string, onStatusReceived: (stat
                 if (states.includes(pc.connectionState)) disconnect();
             };
 
-            const ms = msRef.current ?? await navigator.mediaDevices.getUserMedia({ audio: true });
-            ms.getAudioTracks().forEach(track => { pc.addTrack(track, ms); track.enabled = false; });
+            msRef.current = await navigator.mediaDevices.getUserMedia({ audio: true });
+            msRef.current.getAudioTracks().forEach(track => {
+                pc.addTrack(track, msRef.current!);
+                track.enabled = false;
+            });
 
             const offer = await getSDP('offer', email);
             if (offer) {
                 pc.ondatachannel = (e: RTCDataChannelEvent) => {
                     const dc = e.channel;
-                    dc.onopen = () => onOpen(pc, dc, ms);
+                    dc.onopen = () => onOpen(pc, dc);
                     dc.onmessage = (e: MessageEvent<Status>) => onMessage(e.data);
                 };
                 await pc.setRemoteDescription(offer.sdp);
                 await pc.setLocalDescription(await pc.createAnswer());
             } else {
                 const dc = pc.createDataChannel('STATUS');
-                dc.onopen = () => onOpen(pc, dc, ms);
+                dc.onopen = () => onOpen(pc, dc);
                 dc.onmessage = (e: MessageEvent<Status>) => onMessage(e.data);
                 await pc.setLocalDescription(await pc.createOffer());
             }
@@ -91,7 +93,6 @@ function useStatusExchange(email: string, other: string, onStatusReceived: (stat
 
             if (pc.remoteDescription === null) {
                 pc.close();
-                ms.getTracks().forEach(track => track.stop());
                 disconnect();
             }
         }
